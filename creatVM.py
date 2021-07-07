@@ -22,7 +22,7 @@ resource_client = ResourceManagementClient(credential, subscription_id)
 
 # Constants we need in multiple places: the resource group name and the region
 # in which we provision resources. You can change these values however you want.
-RESOURCE_GROUP_NAME = "Test1"#资源组名称
+RESOURCE_GROUP_NAME = "Test1"#资源组名称，创建新的虚拟机时这个必须要改
 LOCATION = "australiaeast"#资源组位置
 
 # Provision the resource group.
@@ -47,7 +47,7 @@ print(f"Provisioned resource group {rg_result.name} in the {rg_result.location} 
 # can provision the VM.
 
 # Network and IP address names
-VNET_NAME = "test1"#虚拟网络名称
+VNET_NAME = "test1"#虚拟网络名称，创建新的虚拟机时这个必须要改
 SUBNET_NAME = "python-example-subnet"#子网名称
 IP_NAME = "python-example-ip"#公有ip名称
 IP_CONFIG_NAME = "python-example-ip-config"#公有ip配置
