@@ -62,7 +62,7 @@ poller = network_client.virtual_networks.begin_create_or_update(RESOURCE_GROUP_N
     {
         "location": LOCATION,
         "address_space": {
-            "address_prefixes": ["10.0.0.0/16"]#固定
+            "address_prefixes": ["10.0.0.0/16"]
         }
     }
 )
@@ -122,7 +122,7 @@ VM_NAME = "ExampleVM"
 USERNAME = "azureuser"
 PASSWORD = "ChangePa$$w0rd24"
 offer="UbuntuServer"
-vm_size ="Standard_DS1_v2"#硬盘规格，用BS1是免费的
+vm_size ="Standard_B1S"#硬盘规格，用B1S是免费的
 version = "latest"
 print(f"Provisioning virtual machine {VM_NAME}; this operation might take a few minutes.")
 
