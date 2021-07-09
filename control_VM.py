@@ -14,7 +14,7 @@ from haikunator import Haikunator
 class VMController:
     def __init__(self,LOCATION,GROUP_NAME,OS_DISK_NAME,VM_NAME):
         self.haikunator = Haikunator()
-        self.LOCATION=LOCATION
+        self.LOCATION="australiaeast"
         self.GROUP_NAME=GROUP_NAME
         self.client_id="97718fe8-7537-4d37-b912-693d893e688d"
         self.secret="Ih.~QHh12ayCl-ajfkCq6qF_tRoRx_3tt0"
