@@ -2,39 +2,85 @@ package com.example.demo.Service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 
 @Service
-public class AzureService {
+public class AzureService  {
     /**
      * 登录Azure
-     * @param userName  用户名
-     * @param password  密码
      * @return
      */
-    public JSONObject loginAzure(String userName, String password)
-    {
-        String loginCmd = String.format("az login -u "+userName+" -p "+password);
-        String cmd[] = {"cmd","/c",loginCmd};
-        try{
+
+    public String loginAzure()throws IOException, InterruptedException {
+        synchronized (this){
+//           String loginCmd = String.format("python3 /home/Aroot/testLogin.py");
+            String loginCmd = String.format("python3 C:\\Users\\86178\\Desktop\\testLogin.py");
+            System.out.println("-----------");
+            String login[] = {"cmd","-c",loginCmd};
             StringBuilder sb =new StringBuilder();
-            Process process = Runtime.getRuntime().exec(cmd);
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line;
-            while ((line=bufferedReader.readLine())!=null) {
-                sb.append(line);
-            }
-            JSONArray jsonArray = (JSONArray)JSONArray.parse(sb.toString());
-            return jsonArray.getJSONObject(0);
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
+            Process process = Runtime.getRuntime().exec(login);
+            process.waitFor();
         }
+        this.wait(500);
         return null;
+    }
+
+
+    private String getWarining(String filepath) {
+        String result=null;
+        RandomAccessFile r = null;
+        try {
+            r = new RandomAccessFile(filepath, "r");
+            long start = r.getFilePointer();
+            long nextend = start + r.length() - 1;
+            //System.out.println(nextend);
+            r.seek(nextend);
+            int c = -1;
+            while (nextend >= start) {
+                c = r.read();
+                if (c == '\n' || c == '\r') {
+                    result = r.readLine();
+                    //return result;
+                    if(result!=null) {
+                        return result;//打印在控制台
+                    }
+                    //TODO 此处可以自行对result进行操作
+                    nextend--;
+                }
+                nextend--;
+                if(nextend>=0) {
+                    r.seek(nextend);
+                    if (nextend == 0) {// 当文件指针退至文件开始处，输出第一行
+                        return r.readLine();
+                    }
+                }
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (r != null)
+                try {
+                    r.close();
+                    File dir=new File("/home/Aroot/nohup.out");
+                    dir.delete();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            return result;
+        }
+    }
+
+    public String getCode() throws IOException, InterruptedException {
+
+        String temp = getWarining("/home/Aroot/nohup.out");
+        int a = temp.indexOf("code ")+5;
+        String code = temp.substring(a,a+9);
+        return code;
     }
 
     /**
@@ -47,31 +93,90 @@ public class AzureService {
      * @param VM_SIZE   虚拟机磁盘大小
      * @param RESOURCE_GROUP_NAME 资源组名称
      */
-    public void createVmLinux(String subscription_id,String VNET_NAME,String VM_NAME,String USERNAME,String PASSWORD,
+    public String createVmLinux(String subscription_id,String VNET_NAME,String VM_NAME,String USERNAME,String PASSWORD,
                               String VM_SIZE,String RESOURCE_GROUP_NAME) throws IOException, InterruptedException {
-        String cmds = String.format("python D:/code/Azure/python/createVMargs/venv/creatVM_args.py %s %s %s %s %s %s %s",
+        /*String cmds = String.format("python3 /home/Aroot/pythonProject/createVMargs/venv/creatVM_args.py %s %s %s %s %s %s %s",
                 subscription_id, VNET_NAME,VM_NAME,USERNAME,PASSWORD,VM_SIZE,RESOURCE_GROUP_NAME);
+        String vm[] = {"/bin/sh","-c",cmds};
         System.out.println("\nExecuting python script file now.");
-        Process pcs = Runtime.getRuntime().exec(cmds);
-        pcs.waitFor();
+        Process pcs = Runtime.getRuntime().exec(vm);
+        pcs.waitFor();*/
 
-        String result = null;
-        // 获取CMD的返回流
-        BufferedInputStream in = new BufferedInputStream(pcs.getInputStream());
-        // 字符流转换字节流
-        BufferedReader br = new BufferedReader(new InputStreamReader(in));
-        // 这里也可以输出文本日志
-
-        String lineStr = null;
-        while ((lineStr = br.readLine()) != null) {
-            result = lineStr;
+        String startCmd = String.format("python3 /home/Aroot/pythonProject/createVMargs/venv/creatVM_args.py %s %s %s %s %s %s %s",
+                subscription_id, VNET_NAME,VM_NAME,USERNAME,PASSWORD,VM_SIZE,RESOURCE_GROUP_NAME);
+        String vm[] = {"/bin/sh","-c",startCmd};
+        StringBuilder sb =new StringBuilder();
+        Process process = Runtime.getRuntime().exec(vm);
+        System.out.println("\nExecuting python script file now.");
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        String line;
+        while ((line=bufferedReader.readLine())!=null) {
+            sb.append(line);
         }
-        // 关闭输入流
-        br.close();
-        in.close();
+        System.out.println("进程结束");
+        return "success";
+    }
 
-        System.out.println(result);
+    /**
+     *启动虚拟机
+     * @param GROUP_NAME 资源组名称
+     * @param OS_DISK_NAME  磁盘名称
+     * @param VM_NAME   虚拟机名称
+     * @return 启动结果
+     * @throws IOException
+     */
+    public String startVM(String GROUP_NAME,String OS_DISK_NAME,String VM_NAME) throws IOException {
+        String startCmd = String.format("python3 /home/Aroot/pythonProject/createVMargs/venv/startVM.py %s %s %s"
+                ,GROUP_NAME,OS_DISK_NAME,VM_NAME);
+        String vm[] = {"/bin/sh","-c",startCmd};
+        StringBuilder sb =new StringBuilder();
+        Process process = Runtime.getRuntime().exec(vm);
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        String line;
+        while ((line=bufferedReader.readLine())!=null) {
+            sb.append(line);
+        }
+        return  sb.toString();
+    }
 
-        System.out.println("进程结束！");
+    /**
+     * 停止虚拟机
+     * @param GROUP_NAME 资源组名称
+     * @param OS_DISK_NAME  磁盘名称
+     * @param VM_NAME   虚拟机名称
+     * @return 停止结果
+     * @throws IOException
+     */
+    public String stopVM(String GROUP_NAME,String OS_DISK_NAME,String VM_NAME) throws IOException {
+        String startCmd = String.format("python3 /home/Aroot/pythonProject/createVMargs/venv/stopVM.py %s %s %s",
+                GROUP_NAME,OS_DISK_NAME,VM_NAME);
+        String vm[] = {"/bin/sh","-c",startCmd};
+        StringBuilder sb =new StringBuilder();
+        Process process = Runtime.getRuntime().exec(vm);
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        String line;
+        while ((line=bufferedReader.readLine())!=null) {
+            sb.append(line);
+        }
+        return  sb.toString();
+    }
+
+    /**
+     * 获得所有虚拟机信息
+     * @return
+     * @throws InterruptedException
+     * @throws IOException
+     */
+    public JSONArray getAllVMlist() throws InterruptedException, IOException {
+        String startCmd = String.format("az vm list");
+        String vm[] = {"/bin/sh","-c",startCmd};
+        StringBuilder sb =new StringBuilder();
+        Process process = Runtime.getRuntime().exec(vm);
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        String line;
+        while ((line=bufferedReader.readLine())!=null) {
+            sb.append(line);
+        }
+        return JSONArray.parseArray(sb.toString());
     }
 }
