@@ -1,11 +1,15 @@
 import os
 import traceback
-
+from azure.mgmt.kusto import KustoManagementClient
+from azure.mgmt.kusto.models import Cluster, AzureSku
 from azure.common.credentials import ServicePrincipalCredentials
+from azure.identity import ClientSecretCredential
 from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.network import NetworkManagementClient
 from azure.mgmt.compute import ComputeManagementClient
 from azure.mgmt.compute.models import DiskCreateOption
+from azure.mgmt.kusto.models import ReadWriteDatabase
+from datetime import timedelta
 
 from msrestazure.azure_exceptions import CloudError
 
@@ -14,7 +18,7 @@ from haikunator import Haikunator
 class VMController:
     def __init__(self,LOCATION,GROUP_NAME,OS_DISK_NAME,VM_NAME):
         self.haikunator = Haikunator()
-        self.LOCATION="australiaeast"
+        self.LOCATION=LOCATION
         self.GROUP_NAME=GROUP_NAME
         self.client_id="97718fe8-7537-4d37-b912-693d893e688d"
         self.secret="Ih.~QHh12ayCl-ajfkCq6qF_tRoRx_3tt0"
@@ -22,7 +26,15 @@ class VMController:
         self.subscription_id = "ec269b4d-93af-43c5-9fd6-9a5185235344"
         self.OS_DISK_NAME=OS_DISK_NAME
         self.VM_NAME=VM_NAME
-        self.credentials = ServicePrincipalCredentials(client_id=self.client_id,secret=self.secret,tenant=self.tenant)
+        #微软旧包
+        self.credentials = ServicePrincipalCredentials(#虚拟机用
+            client_id=self.client_id,
+            secret=self.secret,
+            tenant=self.tenant
+        )#微软新包
+        self.newcredentials = ClientSecretCredential(  tenant_id=self.tenant,
+                                                    client_id=self.client_id,
+                                                    client_secret=self.secret)
 
         # 此处取得权限
 
@@ -34,6 +46,20 @@ class VMController:
             self.GROUP_NAME,
             self.VM_NAME
         )
+        #下面是sql参数
+        self.sqlresource_client = ResourceManagementClient(self.newcredentials, self.subscription_id)
+        self.sqlcompute_client = ComputeManagementClient(self.newcredentials, self.subscription_id)
+        self.sqlnetwork_client = NetworkManagementClient(self.newcredentials, self.subscription_id)
+        self.sku_name = 'Standard_D13_v2'#型号
+        self.capacity = 5#GB
+        self.sqlLocation = "australiaeast"
+        self.tier = "Standard"#SKU 层
+        self.resource_group_name = 'mysqlTest'#资源组名字
+        self.cluster_name = 'mykustocluster22233'#所需的群集名称
+        self.soft_delete_period = timedelta(days=10)
+        self.hot_cache_period = timedelta(days=10)
+        self.database_name = "mykustodatabase"
+        self.cluster = Cluster(location=self.sqlLocation, sku=AzureSku(name=self.sku_name, capacity=self.capacity, tier=self.tier))
         #需要创建一个管理
         # print('\nCreate (empty) managed Data Disk')
         # async_disk_creation = self.compute_client.disks.create_or_update(
@@ -223,5 +249,34 @@ class VMController:
             self.GROUP_NAME)
         delete_async_operation.wait()
         print("\nDeleted: {}".format(GROUP_NAME))
-# test=VMController("australiaeast","NologinTest","springboot_OsDisk_1_b9d829ffeeec4973a626dd87150ba0eb","springboot")
-# test.stopVM()
+    #sql操作从此处开始
+    #创建群集
+    #在创建数据库前需创建群集
+    def creatCluster(self):
+        kusto_management_client = KustoManagementClient(self.newcredentials, self.subscription_id)
+
+        cluster_operations =kusto_management_client.clusters
+
+        poller = cluster_operations.begin_create_or_update(self.resource_group_name, self.cluster_name,self.cluster)
+        poller.wait()
+        #print(cluster_operations.get(resource_group_name = self.resource_group_name, cluster_name= self.cluster_name, custom_headers=None, raw=False))#判断是否创建成功
+    def creatSql(self):
+        self.creatCluster()
+        kusto_management_client = KustoManagementClient(self.newcredentials, self.subscription_id)
+        database_operations = kusto_management_client.databases
+        database = ReadWriteDatabase(location=self.location,
+                                     soft_delete_period=self.soft_delete_period,
+                                     hot_cache_period=self.hot_cache_period)
+
+        poller = database_operations.begin_create_or_update(resource_group_name=self.resource_group_name,
+                                                      cluster_name=self.cluster_name, database_name=self.database_name,
+                                                      parameters=database)
+        poller.wait()
+        #print(database_operations.get(resource_group_name = resource_group_name, cluster_name = cluster_name, database_name = database_name))
+    def deleteSql(self):
+        cluster_operations.delete(resource_group_name=self.resource_group_name, cluster_name=self.cluster_name)
+
+
+test=VMController("australiaeast","NologinTest","springboot_OsDisk_1_b9d829ffeeec4973a626dd87150ba0eb","springboot")
+# test.startVM()
+test.creatSql()
