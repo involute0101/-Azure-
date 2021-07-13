@@ -1,16 +1,37 @@
 package com.example.demo.Service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.azure.core.management.Region;
+import com.microsoft.aad.adal4j.AuthenticationContext;
+import com.microsoft.aad.adal4j.AuthenticationResult;
+import com.microsoft.azure.management.Azure;
+import com.microsoft.azure.management.sql.implementation.DatabasesImpl;
+import com.microsoft.azure.management.sql.implementation.SqlServerManager;
+import com.microsoft.rest.RestClient;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.net.MalformedURLException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
+import com.microsoft.azure.management.sql.*;
+
+import static io.netty.handler.codec.dns.DnsSection.AUTHORITY;
+
+/**
+ * @author 郭展
+ * @date 2021-07-06
+ */
 @Service
 public class AzureService  {
     /**
-     * 登录Azure
+     * 登录Azure(测试不通过，该模块未完成）
      * @return
      */
 
@@ -102,7 +123,7 @@ public class AzureService  {
         Process pcs = Runtime.getRuntime().exec(vm);
         pcs.waitFor();*/
 
-        String startCmd = String.format("python3 /home/Aroot/pythonProject/createVMargs/venv/creatVM_args.py %s %s %s %s %s %s %s",
+        String startCmd = String.format("python3 /home/Aroot/pythonProject/virtualPy/creatVM_args.py %s %s %s %s %s %s %s",
                 subscription_id, VNET_NAME,VM_NAME,USERNAME,PASSWORD,VM_SIZE,RESOURCE_GROUP_NAME);
         String vm[] = {"/bin/sh","-c",startCmd};
         StringBuilder sb =new StringBuilder();
@@ -126,10 +147,14 @@ public class AzureService  {
      * @throws IOException
      */
     public String startVM(String GROUP_NAME,String OS_DISK_NAME,String VM_NAME) throws IOException {
-        String startCmd = String.format("python3 /home/Aroot/pythonProject/createVMargs/venv/startVM.py %s %s %s"
-                ,GROUP_NAME,OS_DISK_NAME,VM_NAME);
+        //String startCmd = String.format("python3 /home/Aroot/pythonProject/createVMargs/venv/startVM.py %s %s %s"
+        //        ,GROUP_NAME,OS_DISK_NAME,VM_NAME);
+        //String startCmd = String.format("cd /home/Aroot/pythonProject/virtualPy/ENV;source ./bin/activate;" +
+          //      "python3 /home/Aroot/pythonProject/virtualPy/startVM.py %s %s %s;deactivate",GROUP_NAME,OS_DISK_NAME,VM_NAME);
+        String startCmd = String.format("python3 /home/Aroot/pythonProject/virtualPy/startVM.py %s %s %s",GROUP_NAME,OS_DISK_NAME,VM_NAME);
         String vm[] = {"/bin/sh","-c",startCmd};
         StringBuilder sb =new StringBuilder();
+        System.out.println("StartVm");
         Process process = Runtime.getRuntime().exec(vm);
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
         String line;
@@ -148,8 +173,29 @@ public class AzureService  {
      * @throws IOException
      */
     public String stopVM(String GROUP_NAME,String OS_DISK_NAME,String VM_NAME) throws IOException {
-        String startCmd = String.format("python3 /home/Aroot/pythonProject/createVMargs/venv/stopVM.py %s %s %s",
-                GROUP_NAME,OS_DISK_NAME,VM_NAME);
+        //String startCmd = String.format("cd /home/Aroot/pythonProject/virtualPy/ENV;source ./bin/activate;" +
+          //      "python3 /home/Aroot/pythonProject/virtualPy/stopVM.py %s %s %s;deactivate",GROUP_NAME,OS_DISK_NAME,VM_NAME);
+        String startCmd = String.format("python3 /home/Aroot/pythonProject/virtualPy/stopVM.py %s %s %s",GROUP_NAME,OS_DISK_NAME,VM_NAME);
+        String vm[] = {"/bin/sh","-c",startCmd};
+        StringBuilder sb =new StringBuilder();
+        System.out.println("stopVM");
+        Process process = Runtime.getRuntime().exec(vm);
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        String line;
+        while ((line=bufferedReader.readLine())!=null) {
+            sb.append(line);
+        }
+        return  sb.toString();
+    }
+
+    /**
+     * 获得所有虚拟机信息
+     * @return
+     * @throws InterruptedException
+     * @throws IOException
+     */
+    public JSONObject getVMShowInfobyName(String resourceGroup, String name) throws InterruptedException, IOException {
+        String startCmd = String.format("az vm show --resource-group %s --name %s",resourceGroup,name);
         String vm[] = {"/bin/sh","-c",startCmd};
         StringBuilder sb =new StringBuilder();
         Process process = Runtime.getRuntime().exec(vm);
@@ -158,7 +204,24 @@ public class AzureService  {
         while ((line=bufferedReader.readLine())!=null) {
             sb.append(line);
         }
-        return  sb.toString();
+        JSONObject VMinformation = JSONObject.parseObject(sb.toString());
+
+        JSONObject json_storageProfile = VMinformation.getJSONObject("storageProfile");
+
+        JSONObject VMmachine = new JSONObject();
+        VMmachine.put("name",VMinformation.getString("name"));
+        VMmachine.put("location",VMinformation.getString("location"));
+        VMmachine.put("resourceGroup",VMinformation.getString("resourceGroup"));
+        VMmachine.put("OS_Disk_name",json_storageProfile.getJSONObject("osDisk").getString("name"));
+        //VMmachine.putAll(getSubscription_id());
+        VMmachine.put("OS",json_storageProfile.getJSONObject("osDisk").
+                getString("osType")+"("+json_storageProfile.getJSONObject("imageReference").
+                getString("offer")+"  "+json_storageProfile.getJSONObject("imageReference").
+                getString("exactVersion")+")");
+        VMmachine.put("vmSize",VMinformation.getJSONObject("hardwareProfile").getString("vmSize"));
+        //VMmachine.putAll(getVMStatusAndIp(((JSONObject) machine_back).getString("name"),
+          //      ((JSONObject) machine_back).getString("resourceGroup")));
+        return VMmachine;
     }
 
     /**
@@ -178,5 +241,68 @@ public class AzureService  {
             sb.append(line);
         }
         return JSONArray.parseArray(sb.toString());
+    }
+
+    /**
+     * 获取订阅信息
+     * @return 订阅id和订阅名称
+     * @throws IOException
+     */
+    public JSONObject getSubscription() throws IOException {
+        String startCmd = String.format("az account list");
+        String vm[] = {"/bin/sh","-c",startCmd};
+        StringBuilder sb =new StringBuilder();
+        Process process = Runtime.getRuntime().exec(vm);
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        String line;
+        while ((line=bufferedReader.readLine())!=null) {
+            sb.append(line);
+        }
+        JSONArray jsonArray = JSONArray.parseArray(sb.toString());
+        JSONObject result = new JSONObject();
+        result.put("subscriptionId",jsonArray.getJSONObject(0).getString("id"));
+        result.put("subscriptionName",jsonArray.getJSONObject(0).getString("name"));
+        return result;
+    }
+
+    /**
+     * 得到虚拟机运行状态
+     * @param VMname    虚拟机名称
+     * @param resourceGroup 资源组名称
+     * @return  虚拟机的运行状态
+     * @throws IOException
+     */
+    public String getVMStatus(String VMname,String resourceGroup) throws IOException {
+        String startCmd = String.format("az vm get-instance-view --name %s --resource-group %s " +
+                "--query instanceView.statuses[1]",VMname,resourceGroup);
+        String vm[] = {"/bin/sh","-c",startCmd};
+        StringBuilder sb =new StringBuilder();
+        Process process = Runtime.getRuntime().exec(vm);
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        String line;
+        while ((line=bufferedReader.readLine())!=null) {
+            sb.append(line);
+        }
+        return JSONObject.parseObject(sb.toString()).getString("displayStatus");
+    }
+
+    /**
+     * 得到虚拟机的ip
+     * @param VMname
+     * @return
+     */
+    public String getVMip(String VMname) throws IOException {
+        String ipCmd = String.format("az vm list-ip-addresses -n %s",VMname);
+        String vmIP[] = {"/bin/sh","-c",ipCmd};
+        StringBuilder sbIP =new StringBuilder();
+        Process IPprocess = Runtime.getRuntime().exec(vmIP);
+        BufferedReader IPbufferedReader = new BufferedReader(new InputStreamReader(IPprocess.getInputStream()));
+        String lineIP;
+        while ((lineIP=IPbufferedReader.readLine())!=null) {
+            sbIP.append(lineIP);
+        }
+        JSONObject VMipJSon = JSONArray.parseArray(sbIP.toString()).getJSONObject(0);
+        return VMipJSon.getJSONObject("virtualMachine").getJSONObject("network").
+                getJSONArray("publicIpAddresses").getJSONObject(0).getString("ipAddress");
     }
 }
