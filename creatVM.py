@@ -7,8 +7,10 @@ import os
 print(f"Provisioning a virtual machine...some operations might take a minute or two.")
 
 # Acquire a credential object using CLI-based authentication.
-credential = AzureCliCredential()
-
+# credential = AzureCliCredential()
+  credentials = ClientSecretCredential(tenant_id=self.tenant,
+                                                 client_id=self.client_id,
+                                                 client_secret=self.secret)
 # Retrieve subscription ID from environment variable.
 # T:从环境变量检索订阅ID。
 #subscription_id = os.environ["AZURE_SUBSCRIPTION_ID"]#订阅ID
