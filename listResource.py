@@ -3,7 +3,7 @@ from azure.common.credentials import ServicePrincipalCredentials
 from azure.mgmt.resource import ResourceManagementClient
 import os
 AZURE_SUBSCRIPTION_ID="fc4bf4a7-37a5-46c5-bd67-002062908beb"
-def getAllResGroup():
+def getAllRes():
     # Acquire a credential object using CLI-based authentication.
     credential = ServicePrincipalCredentials(  # 虚拟机用
         client_id="043f8d98-95d1-473f-9471-6bcc6fb38d30",
@@ -22,11 +22,12 @@ def getAllResGroup():
     # Show the groups in formatted output
     column_width = 40
 
-    print("Resource Group".ljust(column_width) + "Location")
-    print("-" * (column_width * 2))
+    # print("Resource Group".ljust(column_width) + "Location")
+    # print("-" * (column_width * 2))
 
     for group in list(group_list):
-        print(f"{group.name:<{column_width}}{group.location}")
+        # print(f"{group.name:<{column_width}}{group.location}")
+        getSpeRes(group.name)
 
 def getSpeRes(resName):
 
@@ -52,10 +53,12 @@ def getSpeRes(resName):
     # Show the resources in formatted output
     column_width = 36
 
-    print("Resource".ljust(column_width) + "Type".ljust(column_width))
-    print("-" * (column_width * 4))
+    # print("Resource".ljust(column_width) + "Type".ljust(column_width))
+    # print("-" * (column_width * 4))
 
     for resource in list(resource_list):
-        print(f"{resource.name:<{column_width}}{resource.type:<{column_width}}")
+        begin = resource.type.index("/")
+        shortType = resource.type[begin+1:-1]
+        # print(f"{resource.name:<{column_width}}{shortType:<{column_width}}")
 # getAllRes()
-getSpeRes("NologinTest")
+# getSpeRes("NologinTest")
