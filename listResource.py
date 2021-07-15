@@ -2,7 +2,6 @@
 from azure.mgmt.resource import ResourceManagementClient
 from azure.common.client_factory import get_client_from_cli_profile
 import os
-AZURE_SUBSCRIPTION_ID="fc4bf4a7-37a5-46c5-bd67-002062908beb"
 def getAllRes():
     # Acquire a credential object using CLI-based authentication.
     # credential = ServicePrincipalCredentials(  # 虚拟机用
