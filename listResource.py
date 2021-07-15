@@ -21,7 +21,6 @@ def getAllRes():
     group_list = resource_client.resource_groups.list()
 
     # Show the groups in formatted output
-    column_width = 40
 
     # print("Resource Group".ljust(column_width) + "Location")
     # print("-" * (column_width * 2))
@@ -52,7 +51,6 @@ def getSpeRes(resName):
     )
 
     # Show the resources in formatted output
-    column_width = 36
 
     # print("Resource".ljust(column_width) + "Type".ljust(column_width))
     # print("-" * (column_width * 4))
