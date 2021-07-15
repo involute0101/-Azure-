@@ -67,4 +67,4 @@ def getVMCpuDate(subscription_id,resource_group_name,vm_name):#per hour
     # 2016-11-16 05:00:00+00:00: 43.96
     # 2016-11-16 06:00:00+00:00: 114.9
     # 2016-11-16 07:00:00+00:00: 45.4
-getVMCpuDate("fc4bf4a7-37a5-46c5-bd67-002062908beb","NologinTest","bushu")
+getVMCpuDate("fc4bf4a7-37a5-46c5-bd67-002062908beb","NologinTest","bushu")#test
