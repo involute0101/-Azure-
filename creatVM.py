@@ -6,7 +6,7 @@ from azure.mgmt.compute import ComputeManagementClient
 import os
 import sys
 
-def createVM():
+def createVM():#修改一下即可
     print(f"Provisioning a virtual machine...some operations might take a minute or two.")
 
     # Acquire a credential object using CLI-based authentication.
