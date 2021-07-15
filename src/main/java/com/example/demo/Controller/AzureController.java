@@ -87,9 +87,20 @@ public class AzureController {
         return azureService.stopVM(GROUP_NAME,OS_DISK_NAME,VM_NAME);
     }
 
+    @ApiOperation("删除虚拟机")
+    @ApiImplicitParam(name = "jsonParam",value = "删除虚拟机需要的参数，包括资源组名称，磁盘名称，虚拟机名称")
+    @PostMapping(value = "/deleteVm")
+    @ResponseBody
+    public String deleteVM(@RequestBody JSONObject jsonParam) throws IOException {
+        String GROUP_NAME = jsonParam.getString("GROUP_NAME");
+        String OS_DISK_NAME = jsonParam.getString("OS_DISK_NAME");
+        String VM_NAME = jsonParam.getString("VM_NAME");
+        return azureService.deleteVM(GROUP_NAME,OS_DISK_NAME,VM_NAME);
+    }
+
     @ApiOperation("得到订阅信息")
     @GetMapping(value = "/getSubscription")
-    public JSONObject getSubscription() throws IOException
+    public JSONArray getSubscription() throws IOException
     {
         return azureService.getSubscription();
     }

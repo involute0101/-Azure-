@@ -49,7 +49,6 @@ public class AzureService  {
         return null;
     }
 
-
     private String getWarining(String filepath) {
         String result=null;
         RandomAccessFile r = null;
@@ -189,6 +188,28 @@ public class AzureService  {
     }
 
     /**
+     * 删除虚拟机
+     * @param GROUP_NAME    资源组名称
+     * @param OS_DISK_NAME  磁盘名称
+     * @param VM_NAME   虚拟机名称
+     * @return 停止结果
+     * @throws IOException
+     */
+    public String deleteVM(String GROUP_NAME,String OS_DISK_NAME,String VM_NAME) throws IOException {
+        String startCmd = String.format("python3 /home/Aroot/pythonProject/virtualPy/deleteVM.py %s %s %s",GROUP_NAME,OS_DISK_NAME,VM_NAME);
+        String vm[] = {"/bin/sh","-c",startCmd};
+        StringBuilder sb =new StringBuilder();
+        System.out.println("deleteVM");
+        Process process = Runtime.getRuntime().exec(vm);
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        String line;
+        while ((line=bufferedReader.readLine())!=null) {
+            sb.append(line);
+        }
+        return  sb.toString();
+    }
+
+    /**
      * 获得所有虚拟机信息
      * @return
      * @throws InterruptedException
@@ -248,7 +269,7 @@ public class AzureService  {
      * @return 订阅id和订阅名称
      * @throws IOException
      */
-    public JSONObject getSubscription() throws IOException {
+    public JSONArray getSubscription() throws IOException {
         String startCmd = String.format("az account list");
         String vm[] = {"/bin/sh","-c",startCmd};
         StringBuilder sb =new StringBuilder();
@@ -258,10 +279,14 @@ public class AzureService  {
         while ((line=bufferedReader.readLine())!=null) {
             sb.append(line);
         }
-        JSONArray jsonArray = JSONArray.parseArray(sb.toString());
-        JSONObject result = new JSONObject();
-        result.put("subscriptionId",jsonArray.getJSONObject(0).getString("id"));
-        result.put("subscriptionName",jsonArray.getJSONObject(0).getString("name"));
+        JSONArray subscriptionList = JSONArray.parseArray(sb.toString());
+        JSONArray result = new JSONArray();
+        for(Object json : subscriptionList){
+            JSONObject subscription = new JSONObject();
+            subscription.put("subscriptionId",((JSONObject)json).getString("id"));
+            subscription.put("subscriptionName",((JSONObject)json).getString("name"));
+            result.add(subscription);
+        }
         return result;
     }
 
