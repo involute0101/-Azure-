@@ -6,7 +6,7 @@ from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.network import NetworkManagementClient
 from azure.mgmt.compute import ComputeManagementClient
 from azure.mgmt.compute.models import DiskCreateOption
-from azure.common.client_factory import get_client_from_cli_profile
+from azure.common.client_factory import get_client_from_cli_profile#基于AZ CLI
 
 
 from msrestazure.azure_exceptions import CloudError
