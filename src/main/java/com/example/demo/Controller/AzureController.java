@@ -42,7 +42,7 @@ public class AzureController {
             "虚拟机用户名，密码，虚拟机规格，资源组名称")
     @PostMapping(value = "/createVm")
     @ResponseBody
-    public String createVm(@RequestBody JSONObject jsonParam) throws IOException, InterruptedException {
+    public void createVm(@RequestBody JSONObject jsonParam) throws IOException, InterruptedException {
         String subscription_id = jsonParam.getString("subscription_id");
         String VNET_NAME = jsonParam.getString("VNET_NAME");
         String VM_NAME = jsonParam.getString("VM_NAME");
@@ -50,7 +50,7 @@ public class AzureController {
         String PASSWORD = jsonParam.getString("PASSWORD");
         String VM_SIZE = jsonParam.getString("VM_SIZE");
         String RESOURCE_GROUP_NAME = jsonParam.getString("RESOURCE_GROUP_NAME");
-        return azureService.createVmLinux(subscription_id,VNET_NAME,VM_NAME,USERNAME,PASSWORD,VM_SIZE,RESOURCE_GROUP_NAME);
+        azureService.createVmLinux(subscription_id,VNET_NAME,VM_NAME,USERNAME,PASSWORD,VM_SIZE,RESOURCE_GROUP_NAME);
     }
 
     @ApiOperation("得到所有虚拟机的信息")
@@ -69,33 +69,33 @@ public class AzureController {
     @ApiImplicitParam(name = "jsonParam",value = "启动虚拟机需要的参数，包括资源组名称，磁盘名称，虚拟机名称")
     @PostMapping(value = "/startVm")
     @ResponseBody
-    public String startVM(@RequestBody JSONObject jsonParam) throws IOException {
+    public void startVM(@RequestBody JSONObject jsonParam) throws IOException {
         String GROUP_NAME = jsonParam.getString("GROUP_NAME");
         String OS_DISK_NAME = jsonParam.getString("OS_DISK_NAME");
         String VM_NAME = jsonParam.getString("VM_NAME");
-        return azureService.startVM(GROUP_NAME,OS_DISK_NAME,VM_NAME);
+        azureService.startVM(GROUP_NAME,OS_DISK_NAME,VM_NAME);
     }
 
     @ApiOperation("停止虚拟机")
     @ApiImplicitParam(name = "jsonParam",value = "停止虚拟机需要的参数，包括资源组名称，磁盘名称，虚拟机名称")
     @PostMapping(value = "/stopVm")
     @ResponseBody
-    public String stopVM(@RequestBody JSONObject jsonParam) throws IOException {
+    public void stopVM(@RequestBody JSONObject jsonParam) throws IOException {
         String GROUP_NAME = jsonParam.getString("GROUP_NAME");
         String OS_DISK_NAME = jsonParam.getString("OS_DISK_NAME");
         String VM_NAME = jsonParam.getString("VM_NAME");
-        return azureService.stopVM(GROUP_NAME,OS_DISK_NAME,VM_NAME);
+        azureService.stopVM(GROUP_NAME,OS_DISK_NAME,VM_NAME);
     }
 
     @ApiOperation("删除虚拟机")
     @ApiImplicitParam(name = "jsonParam",value = "删除虚拟机需要的参数，包括资源组名称，磁盘名称，虚拟机名称")
     @PostMapping(value = "/deleteVm")
     @ResponseBody
-    public String deleteVM(@RequestBody JSONObject jsonParam) throws IOException {
+    public void deleteVM(@RequestBody JSONObject jsonParam) throws IOException {
         String GROUP_NAME = jsonParam.getString("GROUP_NAME");
         String OS_DISK_NAME = jsonParam.getString("OS_DISK_NAME");
         String VM_NAME = jsonParam.getString("VM_NAME");
-        return azureService.deleteVM(GROUP_NAME,OS_DISK_NAME,VM_NAME);
+        azureService.deleteVM(GROUP_NAME,OS_DISK_NAME,VM_NAME);
     }
 
     @ApiOperation("得到订阅信息")
@@ -116,5 +116,17 @@ public class AzureController {
     public String getIp(String name) throws IOException {
         return azureService.getVMip(name);
     }
+
+    @ApiOperation("得到虚拟机CPU指标")
+    @PostMapping(value = "/getCpuData")
+    @ResponseBody
+    public JSONObject getCpuData(@RequestBody JSONObject jsonParam) throws IOException {
+        String subscriptionId = jsonParam.getString("subscriptionId");
+        String resourceGroup = jsonParam.getString("resourceGroup");
+        String vmName = jsonParam.getString("vmName");
+        return azureService.getVmCpuData(subscriptionId,resourceGroup,vmName);
+    }
+
+
 
 }

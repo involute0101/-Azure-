@@ -113,7 +113,7 @@ public class AzureService  {
      * @param VM_SIZE   虚拟机磁盘大小
      * @param RESOURCE_GROUP_NAME 资源组名称
      */
-    public String createVmLinux(String subscription_id,String VNET_NAME,String VM_NAME,String USERNAME,String PASSWORD,
+    public void createVmLinux(String subscription_id,String VNET_NAME,String VM_NAME,String USERNAME,String PASSWORD,
                               String VM_SIZE,String RESOURCE_GROUP_NAME) throws IOException, InterruptedException {
         /*String cmds = String.format("python3 /home/Aroot/pythonProject/createVMargs/venv/creatVM_args.py %s %s %s %s %s %s %s",
                 subscription_id, VNET_NAME,VM_NAME,USERNAME,PASSWORD,VM_SIZE,RESOURCE_GROUP_NAME);
@@ -134,7 +134,6 @@ public class AzureService  {
             sb.append(line);
         }
         System.out.println("进程结束");
-        return "success";
     }
 
     /**
@@ -145,7 +144,7 @@ public class AzureService  {
      * @return 启动结果
      * @throws IOException
      */
-    public String startVM(String GROUP_NAME,String OS_DISK_NAME,String VM_NAME) throws IOException {
+    public void startVM(String GROUP_NAME,String OS_DISK_NAME,String VM_NAME) throws IOException {
         //String startCmd = String.format("python3 /home/Aroot/pythonProject/createVMargs/venv/startVM.py %s %s %s"
         //        ,GROUP_NAME,OS_DISK_NAME,VM_NAME);
         //String startCmd = String.format("cd /home/Aroot/pythonProject/virtualPy/ENV;source ./bin/activate;" +
@@ -160,7 +159,6 @@ public class AzureService  {
         while ((line=bufferedReader.readLine())!=null) {
             sb.append(line);
         }
-        return  sb.toString();
     }
 
     /**
@@ -171,7 +169,7 @@ public class AzureService  {
      * @return 停止结果
      * @throws IOException
      */
-    public String stopVM(String GROUP_NAME,String OS_DISK_NAME,String VM_NAME) throws IOException {
+    public void stopVM(String GROUP_NAME,String OS_DISK_NAME,String VM_NAME) throws IOException {
         //String startCmd = String.format("cd /home/Aroot/pythonProject/virtualPy/ENV;source ./bin/activate;" +
           //      "python3 /home/Aroot/pythonProject/virtualPy/stopVM.py %s %s %s;deactivate",GROUP_NAME,OS_DISK_NAME,VM_NAME);
         String startCmd = String.format("python3 /home/Aroot/pythonProject/virtualPy/stopVM.py %s %s %s",GROUP_NAME,OS_DISK_NAME,VM_NAME);
@@ -184,7 +182,6 @@ public class AzureService  {
         while ((line=bufferedReader.readLine())!=null) {
             sb.append(line);
         }
-        return  sb.toString();
     }
 
     /**
@@ -195,7 +192,7 @@ public class AzureService  {
      * @return 停止结果
      * @throws IOException
      */
-    public String deleteVM(String GROUP_NAME,String OS_DISK_NAME,String VM_NAME) throws IOException {
+    public void deleteVM(String GROUP_NAME,String OS_DISK_NAME,String VM_NAME) throws IOException {
         String startCmd = String.format("python3 /home/Aroot/pythonProject/virtualPy/deleteVM.py %s %s %s",GROUP_NAME,OS_DISK_NAME,VM_NAME);
         String vm[] = {"/bin/sh","-c",startCmd};
         StringBuilder sb =new StringBuilder();
@@ -206,7 +203,6 @@ public class AzureService  {
         while ((line=bufferedReader.readLine())!=null) {
             sb.append(line);
         }
-        return  sb.toString();
     }
 
     /**
@@ -215,9 +211,11 @@ public class AzureService  {
      * @throws InterruptedException
      * @throws IOException
      */
-    public JSONObject getVMShowInfobyName(String resourceGroup, String name) throws InterruptedException, IOException {
+    public JSONObject getVMShowInfobyName(String resourceGroup, String name) throws IOException {
+        if(resourceGroup == null || name == null ){throw new IllegalArgumentException("argument illegal!");}
         String startCmd = String.format("az vm show --resource-group %s --name %s",resourceGroup,name);
         String vm[] = {"/bin/sh","-c",startCmd};
+//        String vm[] = {"cmd","/c",startCmd};
         StringBuilder sb =new StringBuilder();
         Process process = Runtime.getRuntime().exec(vm);
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
@@ -226,9 +224,9 @@ public class AzureService  {
             sb.append(line);
         }
         JSONObject VMinformation = JSONObject.parseObject(sb.toString());
+        if(VMinformation == null || VMinformation.isEmpty()){return VMinformation;}
 
         JSONObject json_storageProfile = VMinformation.getJSONObject("storageProfile");
-
         JSONObject VMmachine = new JSONObject();
         VMmachine.put("name",VMinformation.getString("name"));
         VMmachine.put("location",VMinformation.getString("location"));
@@ -251,7 +249,7 @@ public class AzureService  {
      * @throws InterruptedException
      * @throws IOException
      */
-    public JSONArray getAllVMlist() throws InterruptedException, IOException {
+    public JSONArray getAllVMlist() throws IOException {
         String startCmd = String.format("az vm list");
         String vm[] = {"/bin/sh","-c",startCmd};
         StringBuilder sb =new StringBuilder();
@@ -298,6 +296,7 @@ public class AzureService  {
      * @throws IOException
      */
     public String getVMStatus(String VMname,String resourceGroup) throws IOException {
+        if(VMname == null || resourceGroup == null){throw new IllegalArgumentException("argument illegal!");}
         String startCmd = String.format("az vm get-instance-view --name %s --resource-group %s " +
                 "--query instanceView.statuses[1]",VMname,resourceGroup);
         String vm[] = {"/bin/sh","-c",startCmd};
@@ -308,6 +307,8 @@ public class AzureService  {
         while ((line=bufferedReader.readLine())!=null) {
             sb.append(line);
         }
+        JSONObject result = JSONObject.parseObject(sb.toString());
+        if(result == null || result.isEmpty()){return "error!\n virtual machine or resource group isn't exist;";}
         return JSONObject.parseObject(sb.toString()).getString("displayStatus");
     }
 
@@ -317,6 +318,7 @@ public class AzureService  {
      * @return
      */
     public String getVMip(String VMname) throws IOException {
+        if(VMname == null){throw new IllegalArgumentException("argument illegal!");}
         String ipCmd = String.format("az vm list-ip-addresses -n %s",VMname);
         String vmIP[] = {"/bin/sh","-c",ipCmd};
         StringBuilder sbIP =new StringBuilder();
@@ -326,8 +328,44 @@ public class AzureService  {
         while ((lineIP=IPbufferedReader.readLine())!=null) {
             sbIP.append(lineIP);
         }
-        JSONObject VMipJSon = JSONArray.parseArray(sbIP.toString()).getJSONObject(0);
+        JSONArray result = JSONArray.parseArray(sbIP.toString());
+        if(result == null || result.isEmpty()){return "virtual machine isn't exist;";}
+        JSONObject VMipJSon = result.getJSONObject(0);
         return VMipJSon.getJSONObject("virtualMachine").getJSONObject("network").
                 getJSONArray("publicIpAddresses").getJSONObject(0).getString("ipAddress");
+    }
+
+    /**
+     * 获得虚拟机的CPU指标
+     * @param subscriptionId    订阅id
+     * @param resourceGroup 资源组
+     * @param vmName    虚拟机名称
+     * @return
+     * @throws IOException
+     */
+    public JSONObject getVmCpuData(String subscriptionId,String resourceGroup,String vmName) throws IOException {
+        if(subscriptionId == null || resourceGroup == null || vmName == null){throw new IllegalArgumentException("argument illegal;");}
+        String startCmd = String.format("python3 /home/Aroot/pythonProject/virtualPy/cpuData.py %s %s %s",
+                subscriptionId,resourceGroup,vmName);
+        String vm[] = {"/bin/sh","-c",startCmd};
+        StringBuilder sb =new StringBuilder();
+        Process process = Runtime.getRuntime().exec(vm);
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        String line;
+        while ((line=bufferedReader.readLine())!=null) {
+            sb.append(line);
+        }
+        String cpuDataArray[] = sb.toString().split("@");
+        JSONObject result = new JSONObject();
+        try{
+            for(String cpuData : cpuDataArray)
+            {
+                String oneDataInfo[] = cpuData.split("&&");
+                result.put(oneDataInfo[0],oneDataInfo[1]);
+            }
+        }catch (ArrayIndexOutOfBoundsException e){
+            result.put("message","this subscriptionId or resourceGroup or vmName isn't exist;");
+        }
+        return result;
     }
 }

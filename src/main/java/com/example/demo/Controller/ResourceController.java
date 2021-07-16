@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 
+/**
+ * @author 郭展
+ * @date 2021-07-15
+ */
 @RestController
 @RequestMapping(value = "/Resource")
 @Api(tags = "Azure-Resource-controller")

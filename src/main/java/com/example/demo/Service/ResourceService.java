@@ -8,6 +8,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+/**
+ * @author 郭展
+ * @date 2021-07-15
+ */
 @Service
 public class ResourceService {
     /**

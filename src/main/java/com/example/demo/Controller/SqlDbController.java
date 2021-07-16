@@ -8,6 +8,10 @@ import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * @author 郭展
+ * @date 2021-07-13
+ */
 @RestController
 @RequestMapping(value = "/DB")
 @Api(tags = "AzureDB-controller")
