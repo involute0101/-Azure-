@@ -9,9 +9,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+/**
+ * @author 郭展
+ * @date 2021-07-15
+ */
 @Service
 public class LogService {
     public JSONArray getLogInGroup(String resourceGroup) throws IOException {
+        if(resourceGroup == null){throw new IllegalArgumentException("argument illegal;null");}
         String startCmd = String.format("az monitor activity-log list --resource-group %s ",resourceGroup);
         String vm[] = {"/bin/sh","-c",startCmd};
         StringBuilder sb =new StringBuilder();
@@ -23,8 +28,10 @@ public class LogService {
         }
         JSONArray logArray = JSONArray.parseArray(sb.toString());
         JSONArray result = new JSONArray();
+        if(logArray == null || logArray.size() <=0){return result;}
         for(Object o :logArray){
             JSONObject logInfo = (JSONObject) o;
+            if (logInfo == null || logInfo.isEmpty()){continue;}
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("submissionTimestamp",logInfo.getString("submissionTimestamp"));
             jsonObject.put("operationId",logInfo.getString("operationId"));
@@ -58,6 +65,7 @@ public class LogService {
         for(Object o :logArray){
             JSONObject logInfo = (JSONObject) o;
             JSONObject jsonObject = new JSONObject();
+            if(logInfo == null || logInfo.isEmpty()){continue;}
             jsonObject.put("submissionTimestamp",logInfo.getString("submissionTimestamp"));
             jsonObject.put("operationId",logInfo.getString("operationId"));
             jsonObject.put("operationName",logInfo.getJSONObject("operationName").getString("localizedValue"));

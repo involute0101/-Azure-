@@ -31,7 +31,7 @@ public class SqlDbController {
         sqlService.createDB(userName,password,DBname,resourceGroupName);
     }
 
-    @DeleteMapping(value = "/deleteDB")
+    @PostMapping(value = "/deleteDB")
     @ResponseBody
     public void deleteDB(@RequestBody JSONObject jsonParam)
     {

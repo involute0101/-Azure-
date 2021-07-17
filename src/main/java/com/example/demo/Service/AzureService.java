@@ -212,7 +212,7 @@ public class AzureService  {
      * @throws IOException
      */
     public JSONObject getVMShowInfobyName(String resourceGroup, String name) throws IOException {
-        if(resourceGroup == null || name == null ){throw new IllegalArgumentException("argument illegal!");}
+        if(resourceGroup == null || name == null ){throw new IllegalArgumentException("argument illegal;null");}
         String startCmd = String.format("az vm show --resource-group %s --name %s",resourceGroup,name);
         String vm[] = {"/bin/sh","-c",startCmd};
 //        String vm[] = {"cmd","/c",startCmd};
@@ -296,7 +296,7 @@ public class AzureService  {
      * @throws IOException
      */
     public String getVMStatus(String VMname,String resourceGroup) throws IOException {
-        if(VMname == null || resourceGroup == null){throw new IllegalArgumentException("argument illegal!");}
+        if(VMname == null || resourceGroup == null){throw new IllegalArgumentException("argument illegal;null");}
         String startCmd = String.format("az vm get-instance-view --name %s --resource-group %s " +
                 "--query instanceView.statuses[1]",VMname,resourceGroup);
         String vm[] = {"/bin/sh","-c",startCmd};
@@ -318,7 +318,7 @@ public class AzureService  {
      * @return
      */
     public String getVMip(String VMname) throws IOException {
-        if(VMname == null){throw new IllegalArgumentException("argument illegal!");}
+        if(VMname == null){throw new IllegalArgumentException("argument illegal;null");}
         String ipCmd = String.format("az vm list-ip-addresses -n %s",VMname);
         String vmIP[] = {"/bin/sh","-c",ipCmd};
         StringBuilder sbIP =new StringBuilder();
@@ -344,7 +344,7 @@ public class AzureService  {
      * @throws IOException
      */
     public JSONObject getVmCpuData(String subscriptionId,String resourceGroup,String vmName) throws IOException {
-        if(subscriptionId == null || resourceGroup == null || vmName == null){throw new IllegalArgumentException("argument illegal;");}
+        if(subscriptionId == null || resourceGroup == null || vmName == null){throw new IllegalArgumentException("argument illegal;null");}
         String startCmd = String.format("python3 /home/Aroot/pythonProject/virtualPy/cpuData.py %s %s %s",
                 subscriptionId,resourceGroup,vmName);
         String vm[] = {"/bin/sh","-c",startCmd};

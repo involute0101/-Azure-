@@ -21,6 +21,7 @@ public class ResourceService {
     public JSONArray getAllResourece() throws IOException {
         String startCmd = String.format("python3 /home/Aroot/pythonProject/virtualPy/getAllResource.py ");
         String vm[] = {"/bin/sh","-c",startCmd};
+//        String vm[] = {"cmd","/c",startCmd};
         StringBuilder sb =new StringBuilder();
         Process process = Runtime.getRuntime().exec(vm);
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
@@ -33,10 +34,15 @@ public class ResourceService {
         for(String resource : resourceArray)
         {
             String resoucerInfo[] = resource.split("/");
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("name",resoucerInfo[0]);
-            jsonObject.put("type",resoucerInfo[1]);
-            result.add(jsonObject);
+            try{
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("name",resoucerInfo[0]);
+                jsonObject.put("type",resoucerInfo[1]);
+                result.add(jsonObject);
+            }catch (IndexOutOfBoundsException e)
+            {
+                return result;
+            }
         }
         return result;
     }
@@ -61,10 +67,14 @@ public class ResourceService {
         for(String resource : resourceArray)
         {
             String resoucerInfo[] = resource.split("/");
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("name",resoucerInfo[0]);
-            jsonObject.put("location",resoucerInfo[1]);
-            result.add(jsonObject);
+            try{
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("name",resoucerInfo[0]);
+                jsonObject.put("location",resoucerInfo[1]);
+                result.add(jsonObject);
+            }catch (IndexOutOfBoundsException e){
+                return result;
+            }
         }
         return result;
     }
@@ -76,6 +86,7 @@ public class ResourceService {
      * @throws IOException
      */
     public JSONArray getResourceInGroup(String resName) throws IOException {
+        if (resName == null){throw new IllegalArgumentException("argument illegal;null");}
         String startCmd = String.format("python3 /home/Aroot/pythonProject/virtualPy/getResourceInGroup.py %s",resName);
         String vm[] = {"/bin/sh","-c",startCmd};
         StringBuilder sb =new StringBuilder();
@@ -90,13 +101,15 @@ public class ResourceService {
         for(String resource : resourceArray)
         {
             String resoucerInfo[] = resource.split("/");
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("name",resoucerInfo[0]);
-            jsonObject.put("type",resoucerInfo[1]);
-            result.add(jsonObject);
+            try {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("name",resoucerInfo[0]);
+                jsonObject.put("type",resoucerInfo[1]);
+                result.add(jsonObject);
+            }catch (IndexOutOfBoundsException e){
+                return result;
+            }
         }
         return result;
     }
-
-
 }
