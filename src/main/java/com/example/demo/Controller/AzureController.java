@@ -1,22 +1,15 @@
 package com.example.demo.Controller;
 
 import com.alibaba.fastjson.JSONArray;
-import com.azure.core.annotation.Get;
 import com.example.demo.Service.AzureService;
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import retrofit2.http.GET;
-
-
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.util.concurrent.ExecutionException;
 
 /**
  * @author 郭展
@@ -36,6 +29,10 @@ public class AzureController {
         return azureService.loginAzure();
     }
 
+    @GetMapping(value = "/getAccountInfo")
+    public JSONObject getAccountInfo() throws IOException {
+        return azureService.getAccountInfo();
+    }
 
     @ApiOperation("创建虚拟机")
     @ApiImplicitParam(name = "jsonParam",value = "创建虚拟机需要的参数，包括订阅id，虚拟网络名称，虚拟机名称，" +

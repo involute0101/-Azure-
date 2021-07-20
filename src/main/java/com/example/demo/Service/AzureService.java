@@ -11,10 +11,12 @@ import com.microsoft.azure.management.sql.implementation.DatabasesImpl;
 import com.microsoft.azure.management.sql.implementation.SqlServerManager;
 import com.microsoft.rest.RestClient;
 import lombok.SneakyThrows;
+import org.apache.tomcat.jni.Proc;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.net.MalformedURLException;
+import java.util.LinkedHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -31,77 +33,95 @@ import static io.netty.handler.codec.dns.DnsSection.AUTHORITY;
 @Service
 public class AzureService  {
     /**
-     * 登录Azure(测试不通过，该模块未完成）
+     * 登录Azure(抛弃，使用python接口）
      * @return
      */
 
-    public String loginAzure()throws IOException, InterruptedException {
-        synchronized (this){
-//           String loginCmd = String.format("python3 /home/Aroot/testLogin.py");
-            String loginCmd = String.format("python3 C:\\Users\\86178\\Desktop\\testLogin.py");
-            System.out.println("-----------");
-            String login[] = {"cmd","-c",loginCmd};
-            StringBuilder sb =new StringBuilder();
-            Process process = Runtime.getRuntime().exec(login);
-            process.waitFor();
+    public String loginAzure() throws IOException, InterruptedException {
+        String startCmd = String.format("sudo -i;python3 /home/Aroot/pythonProject/virtualPy/ENV/testLogin.py");
+        String vm[] = {"/bin/sh","-c",startCmd};
+        StringBuilder sb =new StringBuilder();
+        System.out.println("login Now");
+        Process process = Runtime.getRuntime().exec(vm);
+        process.wait(1500);
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        String line;
+        while ((line=bufferedReader.readLine())!=null) {
+            sb.append(line);
         }
-        this.wait(500);
-        return null;
+        return sb.toString();
     }
 
-    private String getWarining(String filepath) {
-        String result=null;
-        RandomAccessFile r = null;
-        try {
-            r = new RandomAccessFile(filepath, "r");
-            long start = r.getFilePointer();
-            long nextend = start + r.length() - 1;
-            //System.out.println(nextend);
-            r.seek(nextend);
-            int c = -1;
-            while (nextend >= start) {
-                c = r.read();
-                if (c == '\n' || c == '\r') {
-                    result = r.readLine();
-                    //return result;
-                    if(result!=null) {
-                        return result;//打印在控制台
-                    }
-                    //TODO 此处可以自行对result进行操作
-                    nextend--;
-                }
-                nextend--;
-                if(nextend>=0) {
-                    r.seek(nextend);
-                    if (nextend == 0) {// 当文件指针退至文件开始处，输出第一行
-                        return r.readLine();
-                    }
-                }
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (r != null)
-                try {
-                    r.close();
-                    File dir=new File("/home/Aroot/nohup.out");
-                    dir.delete();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            return result;
+    /**
+     * 获得用户信息
+     * @throws IOException
+     */
+    public JSONObject getAccountInfo() throws IOException {
+        String cmd = String.format("az account show");
+        String vm[] = {"/bin/sh","-c",cmd};
+        StringBuilder sb = new StringBuilder();
+        Process process = Runtime.getRuntime().exec(vm);
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        String line;
+        while((line=bufferedReader.readLine())!=null){
+            sb.append(line);
         }
+        return JSONObject.parseObject(sb.toString());
     }
 
-    public String getCode() throws IOException, InterruptedException {
-
-        String temp = getWarining("/home/Aroot/nohup.out");
-        int a = temp.indexOf("code ")+5;
-        String code = temp.substring(a,a+9);
-        return code;
-    }
+//    private String getWarining(String filepath) {
+//        String result=null;
+//        RandomAccessFile r = null;
+//        try {
+//            r = new RandomAccessFile(filepath, "r");
+//            long start = r.getFilePointer();
+//            long nextend = start + r.length() - 1;
+//            //System.out.println(nextend);
+//            r.seek(nextend);
+//            int c = -1;
+//            while (nextend >= start) {
+//                c = r.read();
+//                if (c == '\n' || c == '\r') {
+//                    result = r.readLine();
+//                    //return result;
+//                    if(result!=null) {
+//                        return result;//打印在控制台
+//                    }
+//                    //TODO 此处可以自行对result进行操作
+//                    nextend--;
+//                }
+//                nextend--;
+//                if(nextend>=0) {
+//                    r.seek(nextend);
+//                    if (nextend == 0) {// 当文件指针退至文件开始处，输出第一行
+//                        return r.readLine();
+//                    }
+//                }
+//            }
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } finally {
+//            if (r != null)
+//                try {
+//                    r.close();
+//                    File dir=new File("/home/Aroot/nohup.out");
+//                    dir.delete();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            return result;
+//        }
+//    }
+//
+//    public String getCode() throws IOException, InterruptedException {
+//
+//        String temp = getWarining("/home/Aroot/nohup.out");
+//        int a = temp.indexOf("code ")+5;
+//        String code = temp.substring(a,a+9);
+//        return code;
+//    }
 
     /**
      * 创建Linux虚拟机
@@ -356,7 +376,7 @@ public class AzureService  {
             sb.append(line);
         }
         String cpuDataArray[] = sb.toString().split("@");
-        JSONObject result = new JSONObject();
+        JSONObject result = new JSONObject(new LinkedHashMap());
         try{
             for(String cpuData : cpuDataArray)
             {
