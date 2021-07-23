@@ -9,13 +9,20 @@ import java.io.IOException;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * @author 郭展
- * @date 2021-07-16
+ * @ClassName: AzureServiceTest
+ * @Author: 郭展
+ * @Date: 2021/7/16
+ * @Description: 测试
  */
 class AzureServiceTest {
 
+    //不自动配置，测试直接new
     private AzureService azureService = new AzureService();
 
+    /**
+     * 对getVMShowInfobyName测试
+     * 包含正常、异常和边界测试
+     */
     @Test
     void getVMShowInfobyName(){
         //异常测试
@@ -46,6 +53,10 @@ class AzureServiceTest {
         }
     }
 
+    /**
+     * 对 getAllVMlist 测试
+     * 包含正常、异常和边界测试
+     */
     @Test
     void getAllVMlist() {
         try{
@@ -55,6 +66,10 @@ class AzureServiceTest {
         }
     }
 
+    /**
+     * 对 getSubscription 测试
+     * 包含正常、异常和边界测试
+     */
     @Test
     void getSubscription() {
         try{
@@ -64,6 +79,10 @@ class AzureServiceTest {
         }
     }
 
+    /**
+     * 对 getVMStatus 测试
+     * 包含正常、异常和边界测试
+     */
     @Test
     void getVMStatus() {
         //异常测试
@@ -93,6 +112,10 @@ class AzureServiceTest {
         }
     }
 
+    /**
+     * 对 getVMip 测试
+     * 包含正常、异常和边界测试
+     */
     @Test
     void getVMip() {
         //异常测试
@@ -118,6 +141,10 @@ class AzureServiceTest {
         }
     }
 
+    /**
+     * 对 getVmNetworkData 测试
+     * 包含正常、异常和边界测试
+     */
     @Test
     void getVmNetworkData() {
         //异常测试
@@ -150,6 +177,10 @@ class AzureServiceTest {
         }
     }
 
+    /**
+     * 对 getVmCpuData 测试
+     * 包含正常、异常和边界测试
+     */
     @Test
     void getVmCpuData() {
         //异常测试

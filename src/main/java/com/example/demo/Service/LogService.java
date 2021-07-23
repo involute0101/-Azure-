@@ -1,20 +1,26 @@
 package com.example.demo.Service;
-
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
 /**
- * @author 郭展
- * @date 2021-07-15
+ * @ClassName: LogService
+ * @Author: 郭展
+ * @Date: 2021/7/15
+ * @Description: Azure日志service层
  */
 @Service
 public class LogService {
+    /**
+     * 获得所有资源组
+     * @param resourceGroup 资源组名称
+     * @return  返回所有资源组，
+     *          JSONArray型
+     * @throws IOException
+     */
     public JSONArray getLogInGroup(String resourceGroup) throws IOException {
         if(resourceGroup == null){throw new IllegalArgumentException("argument illegal;null");}
         String startCmd = String.format("az monitor activity-log list --resource-group %s ",resourceGroup);
@@ -46,7 +52,8 @@ public class LogService {
 
     /**
      * 得到所有日志
-     * @return
+     * @return 所有日志信息
+     *          JSONArray型
      * @throws IOException
      */
     public JSONArray getAllLog() throws IOException {

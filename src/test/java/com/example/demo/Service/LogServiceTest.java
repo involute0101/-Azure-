@@ -8,13 +8,20 @@ import java.io.IOException;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * @author 郭展
- * @date 2021-07-16
+ * @ClassName: LogServiceTest
+ * @Author: 郭展
+ * @Date: 2021/7/16
+ * @Description: 测试
  */
 class LogServiceTest {
 
+    //不自动配置，测试直接new
     private LogService logService = new LogService();
 
+    /**
+     * 对 getLogInGroup 测试
+     * 包含正常、异常和边界测试
+     */
     @Test
     void getLogInGroup() {
         try{
@@ -39,6 +46,10 @@ class LogServiceTest {
         }
     }
 
+    /**
+     * 对 getAllLog 测试
+     * 包含正常、异常和边界测试
+     */
     @Test
     void getAllLog() {
         try{

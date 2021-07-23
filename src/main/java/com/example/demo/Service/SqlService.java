@@ -4,33 +4,32 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.http.policy.HttpLogDetailLevel;
-import com.azure.core.http.rest.PagedIterable;
 import com.azure.core.management.AzureEnvironment;
 import com.azure.core.management.Region;
 import com.azure.core.management.profile.AzureProfile;
 import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.azure.resourcemanager.AzureResourceManager;
-import com.azure.resourcemanager.resources.fluent.ResourceManagementClient;
-import com.azure.resourcemanager.resources.implementation.ResourceManagementClientImpl;
-import com.azure.resourcemanager.resources.models.ResourceGroup;
-import com.azure.resourcemanager.resources.models.ResourceGroups;
 import com.azure.resourcemanager.sql.models.SqlDatabase;
 import com.azure.resourcemanager.sql.models.SqlServer;
 import com.example.demo.Utils.SqlDBUtils;
-import com.microsoft.azure.management.sql.implementation.DatabasesImpl;
 import org.springframework.stereotype.Service;
 
 
 import java.util.Iterator;
 
 /**
- * @author 郭展
- * @date 2021-07-13
+ * @ClassName: SqlService
+ * @Author: 郭展
+ * @Date: 2021/7/13
+ * @Description: Azure数据库service层
  */
 @Service
 public class SqlService {
+
     /**
-     * 得到Azure资源管理，需要已经登录
+     * 私有方法
+     * 获得Azure资源管理者
+     * 需要先登录
      * @return
      */
     private AzureResourceManager getAzureResourceManager()
@@ -94,6 +93,7 @@ public class SqlService {
      * 删除数据库
      * @param SqlServerId 数据库服务器id
      * @param DBname 数据库名称
+     * @return
      */
     public void deleteDb(String SqlServerId,String DBname)
     {

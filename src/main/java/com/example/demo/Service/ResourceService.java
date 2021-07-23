@@ -9,19 +9,21 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 /**
- * @author 郭展
- * @date 2021-07-15
+ * @ClassName: ResourceService
+ * @Author: 郭展
+ * @Date: 2021/7/15
+ * @Description: Azure资源service层
  */
 @Service
 public class ResourceService {
     /**
      * 得到所有所有资源
+     * @return
      * @throws IOException
      */
     public JSONArray getAllResourece() throws IOException {
         String startCmd = String.format("python3 /home/Aroot/pythonProject/virtualPy/getAllResource.py ");
         String vm[] = {"/bin/sh","-c",startCmd};
-//        String vm[] = {"cmd","/c",startCmd};
         StringBuilder sb =new StringBuilder();
         Process process = Runtime.getRuntime().exec(vm);
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));

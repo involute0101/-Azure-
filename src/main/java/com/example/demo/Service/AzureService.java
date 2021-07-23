@@ -1,36 +1,16 @@
 package com.example.demo.Service;
-
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.azure.core.management.Region;
-import com.microsoft.aad.adal4j.AuthenticationContext;
-import com.microsoft.aad.adal4j.AuthenticationResult;
-import com.microsoft.azure.management.Azure;
-import com.microsoft.azure.management.sql.implementation.DatabasesImpl;
-import com.microsoft.azure.management.sql.implementation.SqlServerManager;
-import com.microsoft.rest.RestClient;
-import lombok.SneakyThrows;
-import org.apache.tomcat.jni.Proc;
 import org.springframework.stereotype.Service;
-
 import java.io.*;
-import java.net.MalformedURLException;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
-import com.microsoft.azure.management.sql.*;
-
-import static io.netty.handler.codec.dns.DnsSection.AUTHORITY;
 
 /**
- * @author 郭展
- * @date 2021-07-06
+ * @ClassName: AzureService
+ * @Author: 郭展
+ * @Date: 2021/7/6
+ * @Description: Azure管理Service层
  */
 @Service
 public class AzureService  {
@@ -38,7 +18,6 @@ public class AzureService  {
      * 登录Azure(抛弃，使用python接口）
      * @return
      */
-
     public String loginAzure() throws IOException, InterruptedException {
         String startCmd = String.format("sudo -i;python3 /home/Aroot/pythonProject/virtualPy/ENV/testLogin.py");
         String vm[] = {"/bin/sh","-c",startCmd};
@@ -71,60 +50,6 @@ public class AzureService  {
         return JSONObject.parseObject(sb.toString());
     }
 
-//    private String getWarining(String filepath) {
-//        String result=null;
-//        RandomAccessFile r = null;
-//        try {
-//            r = new RandomAccessFile(filepath, "r");
-//            long start = r.getFilePointer();
-//            long nextend = start + r.length() - 1;
-//            //System.out.println(nextend);
-//            r.seek(nextend);
-//            int c = -1;
-//            while (nextend >= start) {
-//                c = r.read();
-//                if (c == '\n' || c == '\r') {
-//                    result = r.readLine();
-//                    //return result;
-//                    if(result!=null) {
-//                        return result;//打印在控制台
-//                    }
-//                    //TODO 此处可以自行对result进行操作
-//                    nextend--;
-//                }
-//                nextend--;
-//                if(nextend>=0) {
-//                    r.seek(nextend);
-//                    if (nextend == 0) {// 当文件指针退至文件开始处，输出第一行
-//                        return r.readLine();
-//                    }
-//                }
-//            }
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } finally {
-//            if (r != null)
-//                try {
-//                    r.close();
-//                    File dir=new File("/home/Aroot/nohup.out");
-//                    dir.delete();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            return result;
-//        }
-//    }
-//
-//    public String getCode() throws IOException, InterruptedException {
-//
-//        String temp = getWarining("/home/Aroot/nohup.out");
-//        int a = temp.indexOf("code ")+5;
-//        String code = temp.substring(a,a+9);
-//        return code;
-//    }
-
     /**
      * 创建Linux虚拟机
      * @param subscription_id 订阅号id
@@ -137,12 +62,6 @@ public class AzureService  {
      */
     public void createVmLinux(String subscription_id,String VNET_NAME,String VM_NAME,String USERNAME,String PASSWORD,
                               String VM_SIZE,String RESOURCE_GROUP_NAME) throws IOException, InterruptedException {
-        /*String cmds = String.format("python3 /home/Aroot/pythonProject/createVMargs/venv/creatVM_args.py %s %s %s %s %s %s %s",
-                subscription_id, VNET_NAME,VM_NAME,USERNAME,PASSWORD,VM_SIZE,RESOURCE_GROUP_NAME);
-        String vm[] = {"/bin/sh","-c",cmds};
-        System.out.println("\nExecuting python script file now.");
-        Process pcs = Runtime.getRuntime().exec(vm);
-        pcs.waitFor();*/
 
         String startCmd = String.format("python3 /home/Aroot/pythonProject/virtualPy/creatVM_args.py %s %s %s %s %s %s %s",
                 subscription_id, VNET_NAME,VM_NAME,USERNAME,PASSWORD,VM_SIZE,RESOURCE_GROUP_NAME);
@@ -167,10 +86,6 @@ public class AzureService  {
      * @throws IOException
      */
     public void startVM(String GROUP_NAME,String OS_DISK_NAME,String VM_NAME) throws IOException {
-        //String startCmd = String.format("python3 /home/Aroot/pythonProject/createVMargs/venv/startVM.py %s %s %s"
-        //        ,GROUP_NAME,OS_DISK_NAME,VM_NAME);
-        //String startCmd = String.format("cd /home/Aroot/pythonProject/virtualPy/ENV;source ./bin/activate;" +
-          //      "python3 /home/Aroot/pythonProject/virtualPy/startVM.py %s %s %s;deactivate",GROUP_NAME,OS_DISK_NAME,VM_NAME);
         String startCmd = String.format("python3 /home/Aroot/pythonProject/virtualPy/startVM.py %s %s %s",GROUP_NAME,OS_DISK_NAME,VM_NAME);
         String vm[] = {"/bin/sh","-c",startCmd};
         StringBuilder sb =new StringBuilder();
@@ -192,8 +107,6 @@ public class AzureService  {
      * @throws IOException
      */
     public void stopVM(String GROUP_NAME,String OS_DISK_NAME,String VM_NAME) throws IOException {
-        //String startCmd = String.format("cd /home/Aroot/pythonProject/virtualPy/ENV;source ./bin/activate;" +
-          //      "python3 /home/Aroot/pythonProject/virtualPy/stopVM.py %s %s %s;deactivate",GROUP_NAME,OS_DISK_NAME,VM_NAME);
         String startCmd = String.format("python3 /home/Aroot/pythonProject/virtualPy/stopVM.py %s %s %s",GROUP_NAME,OS_DISK_NAME,VM_NAME);
         String vm[] = {"/bin/sh","-c",startCmd};
         StringBuilder sb =new StringBuilder();
@@ -228,16 +141,16 @@ public class AzureService  {
     }
 
     /**
-     * 获得所有虚拟机信息
-     * @return
-     * @throws InterruptedException
+     * 获取虚拟机的展示信息
+     * @param resourceGroup 资源组名称
+     * @param name  虚拟机名称
+     * @return  展示信息
      * @throws IOException
      */
     public JSONObject getVMShowInfobyName(String resourceGroup, String name) throws IOException {
         if(resourceGroup == null || name == null ){throw new IllegalArgumentException("argument illegal;null");}
         String startCmd = String.format("az vm show --resource-group %s --name %s",resourceGroup,name);
         String vm[] = {"/bin/sh","-c",startCmd};
-//        String vm[] = {"cmd","/c",startCmd};
         StringBuilder sb =new StringBuilder();
         Process process = Runtime.getRuntime().exec(vm);
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
@@ -254,14 +167,11 @@ public class AzureService  {
         VMmachine.put("location",VMinformation.getString("location"));
         VMmachine.put("resourceGroup",VMinformation.getString("resourceGroup"));
         VMmachine.put("OS_Disk_name",json_storageProfile.getJSONObject("osDisk").getString("name"));
-        //VMmachine.putAll(getSubscription_id());
         VMmachine.put("OS",json_storageProfile.getJSONObject("osDisk").
                 getString("osType")+"("+json_storageProfile.getJSONObject("imageReference").
                 getString("offer")+"  "+json_storageProfile.getJSONObject("imageReference").
                 getString("exactVersion")+")");
         VMmachine.put("vmSize",VMinformation.getJSONObject("hardwareProfile").getString("vmSize"));
-        //VMmachine.putAll(getVMStatusAndIp(((JSONObject) machine_back).getString("name"),
-          //      ((JSONObject) machine_back).getString("resourceGroup")));
         return VMmachine;
     }
 
@@ -336,7 +246,7 @@ public class AzureService  {
 
     /**
      * 得到虚拟机的ip
-     * @param VMname
+     * @param VMname    虚拟机ip
      * @return
      */
     public String getVMip(String VMname) throws IOException {

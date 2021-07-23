@@ -9,12 +9,19 @@ import java.io.IOException;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * @author 郭展
- * @date 2021-07-16
+ * @ClassName: ResourceServiceTest
+ * @Author: 郭展
+ * @Date: 2021/7/16
+ * @Description: 测试
  */
 class ResourceServiceTest {
+    //不自动配置，测试直接new
     private ResourceService resourceService = new ResourceService();
 
+    /**
+     * 对 getAllResourece 测试
+     * 包含正常、异常和边界测试
+     */
     @Test
     void getAllResourece() {
         try{
@@ -26,6 +33,10 @@ class ResourceServiceTest {
         }
     }
 
+    /**
+     * 对 getAllResourceGroup 测试
+     * 包含正常、异常和边界测试
+     */
     @Test
     void getAllResourceGroup() {
         try{
@@ -37,6 +48,10 @@ class ResourceServiceTest {
         }
     }
 
+    /**
+     * 对 getResourceInGroup 测试
+     * 包含正常、异常和边界测试
+     */
     @Test
     void getResourceInGroup() {
         try{

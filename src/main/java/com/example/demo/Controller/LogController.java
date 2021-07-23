@@ -12,23 +12,37 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 
 /**
- * @author 郭展
- * @date 2021-07-15
+ * @ClassName: LogController
+ * @Author: 郭展
+ * @Date: 2021/7/15
+ * @Description: Azure日志管理接口
  */
 @RestController
 @RequestMapping(value = "/Log")
-@Api(tags = "Azure-Log-controller")
 @NoArgsConstructor
 public class LogController {
 
     @Autowired
     private LogService logService;
 
+    /**
+     * 查看资源组日志
+     * @param resourceGroup 资源组名称
+     * @return  查询的资源组日志
+     *          JSONArray型
+     * @throws IOException
+     */
     @GetMapping(value = "/LogInGroup")
     public JSONArray getLogInGroup(String resourceGroup) throws IOException {
         return logService.getLogInGroup(resourceGroup);
     }
 
+    /**
+     * 查询所有警报
+     * @return  查询所有警报信息
+     *          JSONArray型
+     * @throws IOException
+     */
     @GetMapping(value = "/allAlert")
     public JSONArray getAllLog() throws IOException {
         return logService.getAllLog();

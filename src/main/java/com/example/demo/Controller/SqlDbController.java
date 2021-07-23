@@ -9,17 +9,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * @author 郭展
- * @date 2021-07-13
+ * @ClassName: SqlDbController
+ * @Author: 郭展
+ * @Date: 2021/7/13
+ * @Description: Azure数据库管理接口
  */
 @RestController
 @RequestMapping(value = "/DB")
-@Api(tags = "AzureDB-controller")
 @NoArgsConstructor
 public class SqlDbController {
     @Autowired
     private SqlService sqlService;
 
+    /**
+     * 创建数据库
+     * @param jsonParam 传入参数
+     *      userName  用户名
+     *      password  密码
+     *      DBname    数据库名称
+     *      resourceGroupName 资源组名称
+     */
     @PostMapping(value = "/createDB")
     @ResponseBody
     public void createDB(@RequestBody JSONObject jsonParam)
@@ -31,6 +40,12 @@ public class SqlDbController {
         sqlService.createDB(userName,password,DBname,resourceGroupName);
     }
 
+    /**
+     * 删除数据库
+     * @param jsonParam 传入参数
+     *      SqlServerId 数据库服务器id
+     *      DBname 数据库名称
+     */
     @PostMapping(value = "/deleteDB")
     @ResponseBody
     public void deleteDB(@RequestBody JSONObject jsonParam)
@@ -40,6 +55,10 @@ public class SqlDbController {
         sqlService.deleteDb(SqlServerId,DBname);
     }
 
+    /**
+     * 查询所有数据库
+     * @return  数据库列表
+     */
     @GetMapping(value = "/allDB")
     public JSONArray getAllDb()
     {

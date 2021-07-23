@@ -1,6 +1,3 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
-
 package com.example.demo.Utils;
 
 import com.azure.core.annotation.*;
@@ -82,15 +79,19 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 /**
- * Common utils for Azure management samples.
+ * 工具类，用于Azure各类信息的输出和随机参数生成
+ * 主要用于数据库，其他功能已用其他方法完成
+ * 剩余未后续算法优化而保留
  */
-
 public final class SqlDBUtils {
 
     private SqlDBUtils() {
     }
 
-    /** @return a generated password */
+    /**
+     * 返回一个随机密码
+     * @return
+     */
     public static String password() {
         String password = new ResourceManagerUtils.InternalRuntimeContext().randomResourceName("Pa5$", 12);
         System.out.printf("Password: %s%n", password);
@@ -153,9 +154,9 @@ public final class SqlDBUtils {
     }
 
     /**
-     * Print resource group info.
+     * 输出资源组信息
      *
-     * @param resource a resource group
+     * @param resource 资源组
      */
     public static void print(ResourceGroup resource) {
         StringBuilder info = new StringBuilder();
@@ -167,9 +168,9 @@ public final class SqlDBUtils {
     }
 
     /**
-     * Print User Assigned MSI info.
+     * 输出用户认证信息
      *
-     * @param resource a User Assigned MSI
+     * @param resource 用户认证资源
      */
     public static void print(Identity resource) {
         StringBuilder info = new StringBuilder();
@@ -184,9 +185,9 @@ public final class SqlDBUtils {
     }
 
     /**
-     * Print virtual machine info.
+     * 输出虚拟机信息
      *
-     * @param resource a virtual machine
+     * @param resource 虚拟机
      */
     public static void print(VirtualMachine resource) {
 
@@ -393,9 +394,9 @@ public final class SqlDBUtils {
     }
 
     /**
-     * Print network interface.
+     * 输出网络接口
      *
-     * @param resource a network interface
+     * @param resource 网络接口
      */
     public static void print(NetworkInterface resource) {
         StringBuilder info = new StringBuilder();
@@ -428,9 +429,9 @@ public final class SqlDBUtils {
     }
 
     /**
-     * Print network security group.
+     * 输出网络安全组
      *
-     * @param resource a network security group
+     * @param resource 网络安全组
      */
     public static void print(NetworkSecurityGroup resource) {
         StringBuilder info = new StringBuilder();
@@ -457,9 +458,9 @@ public final class SqlDBUtils {
     }
 
     /**
-     * Print public IP address.
+     * 输出公共ip地址
      *
-     * @param resource a public IP address
+     * @param resource 公共ip地址
      */
     public static void print(PublicIpAddress resource) {
         System.out.println(new StringBuilder().append("Public IP Address: ").append(resource.id())
@@ -2911,7 +2912,7 @@ public final class SqlDBUtils {
     }
 
     /**
-     * Print Action group settings.
+     * 输出活动组
      *
      * @param actionGroup action group instance
      */
@@ -3017,9 +3018,9 @@ public final class SqlDBUtils {
     }
 
     /**
-     * Print activity log alert settings.
+     * 输出日志警报
      *
-     * @param activityLogAlert activity log instance
+     * @param activityLogAlert 活动日志警报
      */
     public static void print(ActivityLogAlert activityLogAlert) {
 
@@ -3053,9 +3054,9 @@ public final class SqlDBUtils {
     }
 
     /**
-     * Print metric alert settings.
+     * 输出警报设置
      *
-     * @param metricAlert metric alert instance
+     * @param metricAlert 警报
      */
     public static void print(MetricAlert metricAlert) {
 
@@ -3186,13 +3187,13 @@ public final class SqlDBUtils {
     }
 
     /**
-     * Sends a GET request to target URL.
+     * 发送Get请求到目标URL
      * <p>
      * Retry logic tuned for AppService.
      * The method does not handle 301 redirect.
      *
-     * @param urlString the target URL.
-     * @return Content of the HTTP response.
+     * @param urlString 目标URL
+     * @return HTTP response返回内容
      */
     public static String sendGetRequest(String urlString) {
         ClientLogger logger = new ClientLogger(SqlDBUtils.class);
@@ -3225,13 +3226,13 @@ public final class SqlDBUtils {
     }
 
     /**
-     * Sends a POST request to target URL.
+     * 发送post请求到目标URL
      * <p>
      * Retry logic tuned for AppService.
      *
-     * @param urlString the target URL.
-     * @param body the request body.
-     * @return Content of the HTTP response.
+     * @param urlString 目标URL
+     * @param body 请求体
+     * @return HTTP response内容
      * */
     public static String sendPostRequest(String urlString, String body) {
         ClientLogger logger = new ClientLogger(SqlDBUtils.class);
@@ -3303,12 +3304,4 @@ public final class SqlDBUtils {
         Mono<Response<Flux<ByteBuffer>>> postString(@HostParam("$host") String host, @PathParam(value = "path", encoded = true) String path, @BodyParam("text/plain") String body);
     }
 
-    public static <T> int getSize(Iterable<T> iterable) {
-        int res = 0;
-        Iterator<T> iterator = iterable.iterator();
-        while (iterator.hasNext()) {
-            iterator.next();
-        }
-        return res;
-    }
 }
