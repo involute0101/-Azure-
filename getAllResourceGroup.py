@@ -1,3 +1,0 @@
-import listResource
-
-listResource.getAllResourceGroup()
