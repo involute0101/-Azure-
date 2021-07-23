@@ -45,7 +45,7 @@ def getVMCpuDate(subscription_id,resource_group_name,vm_name):#per hour
         resource_id,
         timespan="{}/{}".format(yesterday, today),
         interval='PT1H',
-        metricnames='Percentage CPU',
+        metricnames='Percentage CPU',#获取其他指标时可改
         aggregation='Total'
     )
 
