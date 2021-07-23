@@ -119,6 +119,38 @@ class AzureServiceTest {
     }
 
     @Test
+    void getVmNetworkData() {
+        //异常测试
+        try{
+            azureService.getVmNetworkData(null,null,null);
+        }catch (Exception e)
+        {
+            assertTrue(e instanceof IllegalArgumentException);
+        }
+
+        try{
+            JSONObject VmNetworkData = azureService.getVmNetworkData("xxxx", "xxxx", "xxx");
+            assertTrue(VmNetworkData.getString("message").equals("this subscriptionId or resourceGroup or vmName isn't exist;"));
+            JSONObject VmNetworkData1 = azureService.getVmNetworkData("fc4bf4a7-37a5-46c5-bd67-002062908beb", "xxxx", "xxx");
+            assertTrue(VmNetworkData1.getString("message").equals("this subscriptionId or resourceGroup or vmName isn't exist;"));
+            JSONObject VmNetworkData2 = azureService.getVmNetworkData("fc4bf4a7-37a5-46c5-bd67-002062908beb", "NologinTest", "xxx");
+            assertTrue(VmNetworkData2.getString("message").equals("this subscriptionId or resourceGroup or vmName isn't exist;"));
+            JSONObject VmNetworkData3 = azureService.getVmNetworkData("fc4bf4a7-37a5-46c5-bd67-002062908beb", "NologinTest", "bushu");
+            assertTrue(VmNetworkData3.getString("message").equals("this subscriptionId or resourceGroup or vmName isn't exist;"));
+        }catch (Exception e){
+            assertTrue(e instanceof IOException);
+        }
+
+        //正常测试
+        try {
+            JSONObject VmNetworkData = azureService.getVmNetworkData("fc4bf4a7-37a5-46c5-bd67-002062908beb", "NologinTest", "bushu");
+            assertTrue(VmNetworkData.getString("message").isEmpty());
+        }catch (Exception e){
+            assertTrue(e instanceof IOException);
+        }
+    }
+
+    @Test
     void getVmCpuData() {
         //异常测试
         try{

@@ -1,5 +1,6 @@
 package com.example.demo.Controller;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.example.demo.Service.AzureService;
 import com.alibaba.fastjson.JSONObject;
@@ -124,6 +125,21 @@ public class AzureController {
         return azureService.getVmCpuData(subscriptionId,resourceGroup,vmName);
     }
 
+    @ApiOperation("得到虚拟机网络指标")
+    @PostMapping(value = "/getNetworkData")
+    @ResponseBody
+    public JSONObject getNetworkData(@RequestBody JSONObject jsonParam) throws IOException {
+        String subscriptionId = jsonParam.getString("subscriptionId");
+        String resourceGroup = jsonParam.getString("resourceGroup");
+        String vmName = jsonParam.getString("vmName");
+        return azureService.getVmNetworkData(subscriptionId,resourceGroup,vmName);
+    }
 
-
+    @ApiOperation("设置默认订阅id")
+    @PostMapping(value = "/setSubscription")
+    @ResponseBody
+    public void setDefaultSub(@RequestBody JSONObject jsonParam) throws IOException {
+        String subscriptionId = jsonParam.getString("subscriptionId");
+        azureService.setDefaultSub(subscriptionId);
+    }
 }

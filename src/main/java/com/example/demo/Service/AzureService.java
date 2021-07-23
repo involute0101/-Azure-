@@ -16,7 +16,9 @@ import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.net.MalformedURLException;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -387,5 +389,58 @@ public class AzureService  {
             result.put("message","this subscriptionId or resourceGroup or vmName isn't exist;");
         }
         return result;
+    }
+
+    /**
+     * 获取虚拟机网络指标
+     * @param subscriptionId    订阅id
+     * @param resourceGroup 资源组名称
+     * @param vmName    虚拟机名称
+     * @return  虚拟机网络指标，按小时分隔
+     * @throws IOException
+     */
+    public JSONObject getVmNetworkData(String subscriptionId,String resourceGroup,String vmName) throws IOException {
+        if(subscriptionId == null || resourceGroup == null || vmName == null){throw new IllegalArgumentException("argument illegal;null");}
+        String startCmd = String.format("python3 /home/Aroot/pythonProject/virtualPy/networkData.py %s %s %s",
+                subscriptionId,resourceGroup,vmName);
+        String vm[] = {"/bin/sh","-c",startCmd};
+        StringBuilder sb = new StringBuilder();
+        Process process = Runtime.getRuntime().exec(vm);
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        String line;
+        while ((line=bufferedReader.readLine())!=null) {
+            sb.append(line);
+        }
+        String networdDataArray[] = sb.toString().split("@");
+        JSONObject result = new JSONObject(new LinkedHashMap());
+        try{
+            for(String networkData : networdDataArray)
+            {
+                String oneDataInfo[] = networkData.split("&&");
+                result.put(oneDataInfo[0],oneDataInfo[1]);
+            }
+        }catch (ArrayIndexOutOfBoundsException e){
+            result.put("message","this subscriptionId or resourceGroup or vmName isn't exist;");
+        }
+        return result;
+    }
+
+    /**
+     * 设置默认订阅id
+     * @param subscriptionId    订阅id
+     * @return
+     * @throws IOException
+     */
+    public void setDefaultSub(String subscriptionId) throws IOException {
+        if(subscriptionId == null){throw new IllegalArgumentException("argument illegal;null");}
+        String startCmd = String.format("az account set --subscription %s",subscriptionId);
+        String vm[] = {"/bin/sh","-c",startCmd};
+        StringBuilder sb =new StringBuilder();
+        Process process = Runtime.getRuntime().exec(vm);
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        String line;
+        while ((line=bufferedReader.readLine())!=null) {
+            sb.append(line);
+        }
     }
 }
