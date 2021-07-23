@@ -1,10 +1,8 @@
 import datetime
 from azure.mgmt.monitor import MonitorManagementClient
 from azure.common.client_factory import get_client_from_cli_profile
-def getVMCpuDate(subscription_id,resource_group_name,vm_name):#per hour
-    # Get the ARM id of your resource. You might chose to do a "get"
-    # using the according management or to build the URL directly
-    # Example for a ARM VM
+import sys
+def getVMCpuData(subscription_id,resource_group_name,vm_name):#每小时
     resource_id = (
         "subscriptions/{}/"
         "resourceGroups/{}/"
@@ -17,17 +15,17 @@ def getVMCpuDate(subscription_id,resource_group_name,vm_name):#per hour
     # )
     # create client
     client = get_client_from_cli_profile(MonitorManagementClient)
+    # #获取各种资源名称代码
+    # #You can get the available metrics of this specific resource
+    # for metric in client.metric_definitions.list(resource_id):
+    #     # azure.monitor.models.MetricDefinition
+    #     print("{}: id={}, unit={}".format(
+    #         metric.name.localized_value,
+    #         metric.name.value,
+    #         metric.unit
+    #     ))
 
-    # You can get the available metrics of this specific resource
-    for metric in client.metric_definitions.list(resource_id):
-        # azure.monitor.models.MetricDefinition
-        print("{}: id={}, unit={}".format(
-            metric.name.localized_value,
-            metric.name.value,
-            metric.unit
-        ))
-
-    # Example of result for a VM:
+    # 运行的结果示例
     # Percentage CPU: id=Percentage CPU, unit=Unit.percent
     # Network In: id=Network In, unit=Unit.bytes
     # Network Out: id=Network Out, unit=Unit.bytes
@@ -38,26 +36,26 @@ def getVMCpuDate(subscription_id,resource_group_name,vm_name):#per hour
 
     # Get CPU total of yesterday for this VM, by hour
 
-    today = datetime.datetime.now().date()
-    yesterday = today - datetime.timedelta(days=1)
-
+    today = datetime.datetime.now().time()
+    # yesterday = today - datetime.timedelta(hours=24)
+    yesterday = datetime.datetime.now() - datetime.timedelta(hours=24)
     metrics_data = client.metrics.list(
         resource_id,
         timespan="{}/{}".format(yesterday, today),
         interval='PT1H',
-        metricnames='Percentage CPU',#获取其他指标时可改
+        metricnames='Percentage CPU',#此处可改获取其他资源指标
         aggregation='Total'
     )
 
     for item in metrics_data.value:
         # azure.mgmt.monitor.models.Metric
-        print(item.name)
+        # print(item.name)
         for timeserie in item.timeseries:
             for data in timeserie.data:
                 # azure.mgmt.monitor.models.MetricData
-                print("{}: {}".format(data.time_stamp, data.total))
+                print("{}&&{}@".format(data.time_stamp, data.total))
 
-    # Example of result:
+    # # 运行的结果示例
     # Percentage CPU (percent)
     # 2016-11-16 00:00:00+00:00: 72.0
     # 2016-11-16 01:00:00+00:00: 90.59
@@ -67,4 +65,14 @@ def getVMCpuDate(subscription_id,resource_group_name,vm_name):#per hour
     # 2016-11-16 05:00:00+00:00: 43.96
     # 2016-11-16 06:00:00+00:00: 114.9
     # 2016-11-16 07:00:00+00:00: 45.4
-getVMCpuDate("fc4bf4a7-37a5-46c5-bd67-002062908beb","NologinTest","bushu")#test
+#fortest
+#getVMCpuData("fc4bf4a7-37a5-46c5-bd67-002062908beb","NologinTest11","springboot14")
+
+subscriptionId = sys.argv[1]
+resourceGroup = sys.argv[2]
+VM_name = sys.argv[3]
+getVMCpuData(subscriptionId,resourceGroup,VM_name)
+
+# getVMCpuData("fc4bf4a7-37a5-46c5-bd67-002062908beb","NologinTest","bushu222")
+    # getSqlData("fc4bf4a7-37a5-46c5-bd67-002062908beb","NologinTest","sqltest6866","Thisissql2")
+    # getUrl()

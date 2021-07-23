@@ -6,7 +6,7 @@ from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.network import NetworkManagementClient
 from azure.mgmt.compute import ComputeManagementClient
 from azure.mgmt.compute.models import DiskCreateOption
-from azure.common.client_factory import get_client_from_cli_profile#基于AZ CLI
+from azure.common.client_factory import get_client_from_cli_profile
 
 
 from msrestazure.azure_exceptions import CloudError
@@ -14,14 +14,14 @@ from msrestazure.azure_exceptions import CloudError
 from haikunator import Haikunator
 
 class VMController:
-    def __init__(self,LOCATION,GROUP_NAME,OS_DISK_NAME,VM_NAME):
+    def __init__(self,GROUP_NAME,OS_DISK_NAME,VM_NAME):
         self.haikunator = Haikunator()
-        self.LOCATION=LOCATION
+        self.LOCATION="japaneast"
         self.GROUP_NAME=GROUP_NAME
-        self.client_id="043f8d98-95d1-473f-9471-6bcc6fb38d30"
-        self.secret="o2Ms_n_y1DMR6-j6H-j_tyzlGNXj8s3I14"
-        self.tenant="fcf1c04c-90e4-4b45-b1a5-7c0dc46c6ad6""fcf1c04c-90e4-4b45-b1a5-7c0dc46c6ad6"
-        self.subscription_id = "fc4bf4a7-37a5-46c5-bd67-002062908beb"
+        self.client_id="851b2cac-cf6f-4069-a387-21caccb57ff8"
+        self.secret="MVS09Iqy1gGp2U9E2CL-2Pt.~~ybj-zWGM"
+        self.tenant="b95147ec-13cc-4b1a-84b3-0437e31a6f84"
+        self.subscription_id = "19a97935-8748-461b-bb12-6d0ee497b8b3"
         self.OS_DISK_NAME=OS_DISK_NAME
         self.VM_NAME=VM_NAME
         #微软旧包
@@ -72,51 +72,8 @@ class VMController:
         #     }
         # )
         # self.data_disk = async_disk_creation.result()
-    # Azure Datacenter
-    # LOCATION = 'westus'
-    #
-    # # Resource Group
-    # GROUP_NAME = 'azure-sample-group-virtual-machines'
-    #
-    # # Network
-    # VNET_NAME = 'azure-sample-vnet'
-    # SUBNET_NAME = 'azure-sample-subnet'
-    #
-    # # VM
-    # OS_DISK_NAME = 'azure-sample-osdisk'
-    # STORAGE_ACCOUNT_NAME = haikunator.haikunate(delimiter='')
-    #
-    # IP_CONFIG_NAME = 'azure-sample-ip-config'
-    # NIC_NAME = 'azure-sample-nic'
-    # USERNAME = 'userlogin'
-    # PASSWORD = 'Pa$$w0rd91'
-    # VM_NAME = 'VmName'
 
-    # def get_credentials(subscription_id,client_id,secret,tenant):
-    #     #subscription_id = os.environ['AZURE_SUBSCRIPTION_ID']
-    #     #credentials = ServicePrincipalCredentials(
-    #     #    client_id=os.environ['AZURE_CLIENT_ID'],
-    #     #    secret=os.environ['AZURE_CLIENT_SECRET'],
-    #     #    tenant=os.environ['AZURE_TENANT_ID']
-    #     #)
 
-    #这个我也不知道啥意思
-    # def TagVM(self):
-    #     print('\nTag Virtual Machine')
-    #     async_vm_update = compute_client.virtual_machines.create_or_update(
-    #         GROUP_NAME,
-    #         VM_NAME,
-    #         {
-    #             'location': self.LOCATION,
-    #             'tags': {
-    #                 'who-rocks': 'python',
-    #                 'where': 'on azure'
-    #             }
-    #         }
-    #     )
-    # async_vm_update.wait()
-
-    # Create managed data disk
 
 
 
@@ -145,7 +102,7 @@ class VMController:
         )
         async_disk_attach.wait()
 
-    # Detach data disk
+    # 分离数据磁盘
     def detachDisk(self,diskname):
         print('\nDetach Data Disk')
         data_disks = self.virtual_machine.storage_profile.data_disks
@@ -158,7 +115,6 @@ class VMController:
         )
         virtual_machine = async_vm_update.result()
 
-    # Deallocating the VM (in preparation for a disk resize)
     # 释放虚拟机(为调整磁盘大小做准备)
     def deallocatingVM(self):
         print('\nDeallocating the VM (to prepare for a disk resize)')
@@ -166,7 +122,7 @@ class VMController:
             self.GROUP_NAME, self.VM_NAME)
         async_vm_deallocate.wait()
 
-    # Increase OS disk size by 10 GB
+    # 增加磁盘大小
     def increaseDisk(self,disk_size_gb):
         print('\nUpdate OS disk size')
         os_disk_name = self.virtual_machine.storage_profile.os_disk.name
@@ -174,12 +130,9 @@ class VMController:
         if not os_disk.disk_size_gb:
             print(
                 "\tServer is not returning the OS disk size, possible bug in the server?")
-            # print("\tAssuming that the OS disk size is 30 GB")
-            # os_disk.disk_size_gb = 30
             return
 
         os_disk.disk_size_gb += disk_size_gb
-
         async_disk_update =self.compute_client.disks.create_or_update(
             GROUP_NAME,
             os_disk.name,
@@ -187,46 +140,46 @@ class VMController:
         )
         async_disk_update.wait()
 
-    # Start the VM
+    # 启动虚拟机
     def startVM(self):
         print('\nStart VM')
         async_vm_start = self.compute_client.virtual_machines.begin_start(
             self.GROUP_NAME, self.VM_NAME)
         async_vm_start.wait()
 
-    # Restart the VM
+    # 重启虚拟机
     def restartVM(self):
         print('\nRestart VM')
         async_vm_restart = self.compute_client.virtual_machines.begin_restart(
             self.GROUP_NAME, self.VM_NAME)
         async_vm_restart.wait()
 
-    # Stop the VM
+    # 停止虚拟机
     def stopVM(self):
         print('\nStop VM')
         async_vm_stop = self.compute_client.virtual_machines.begin_power_off(
             self.GROUP_NAME, self.VM_NAME)
         async_vm_stop.wait()
 
-    # List VMs in subscription
+    # 显示一个订阅ID中的所有虚拟机名称
     def listVM(self):
         print('\nList VMs in subscription')
         for vm in self.compute_client.virtual_machines.list_all():
             print("\tVM: {}".format(vm.name))
 
-    # List VM in resource group
+    # 显示一个订阅ID中的所有资源名称
     def listResourcegroup(self):
         print('\nList VMs in resource group')
         for vm in self.compute_client.virtual_machines.list(self.GROUP_NAME):
             print("\tVM: {}".format(vm.name))
 
-    # Delete VM
+    # 删除虚拟机
     def deleteVM(self):
         print('\nDelete VM')
-        async_vm_delete = self.compute_client.virtual_machines.delete(
+        async_vm_delete = self.compute_client.virtual_machines.begin_delete(
             self.GROUP_NAME, self.VM_NAME)
         async_vm_delete.wait()
-
+    # 创建Windows虚拟机
     # Create Windows VM
     # print('\nCreating Windows Virtual Machine')
     # # Recycling NIC of previous VM
@@ -240,7 +193,7 @@ class VMController:
     # print('All example operations completed successfully!')
     # finally:
 
-    # Delete Resource group and everything in it
+    # 删除资源组
     def deleteResource(self):
         print('\nDelete Resource Group')
         delete_async_operation = self.resource_client.resource_groups.delete(
@@ -273,7 +226,7 @@ class VMController:
     # def deleteSql(self):
     #     cluster_operations.delete(resource_group_name=self.resource_group_name, cluster_name=self.cluster_name)
 
-
+##测试
 # test=VMController("australiaeast","Test1","ExampleVM_OsDisk_1_0d525b8269a541b5b6eec41d9c16e78b","ExampleVM")
 # test.stopVM()
 #for test

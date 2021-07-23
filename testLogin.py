@@ -1,8 +1,5 @@
 import os
 import time
-from flask import Flask
-app = Flask(__name__)
-@app.route('/getCode')
 def getCode():
     os.system("nohup az login&")
     time.sleep(1)
@@ -11,7 +8,6 @@ def getCode():
         last_line = lines[-1]  # 取最后一行
         begin=last_line.index("code")+5
     code=last_line[begin:begin+9]
-    return {"code":code}
+    print(code)
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port="33")
-
+    getCode()
